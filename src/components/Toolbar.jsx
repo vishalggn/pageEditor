@@ -16,6 +16,11 @@ function Toolbar({
     setForm({ ...el.style });
   }, [el.style]);
 
+  useEffect(() => {
+  setForm({ ...el.style });
+  setVisible(true);
+}, [el.style, el.id, selectedSubKey]);
+
   const px = (val) => (val.toString().endsWith("px") ? val : val + "px");
 
   const update = (field, value) => {
@@ -40,7 +45,7 @@ function Toolbar({
 
   if (!visible) return null;
 
-  // Detect which part of container is selected
+  // Parse selection for container
   let containerEditField = null;
   let planIndex = null;
   let featureIndex = null;
@@ -48,9 +53,8 @@ function Toolbar({
     const match = selectedSubKey.match(
       /(title|price|feature|button)-(\d+)(?:-(\d+))?/
     );
-
     if (match) {
-      containerEditField = match[1]; // title, price, feature
+      containerEditField = match[1];
       planIndex = parseInt(match[2]);
       featureIndex = match[3] !== undefined ? parseInt(match[3]) : null;
     }
@@ -90,7 +94,7 @@ function Toolbar({
         </>
       )}
 
-      {/* Text */}
+      {/* Text Element Text */}
       {el.type === "text" && (
         <div className="flex flex-col">
           <label className="text-xs text-gray-600 mb-1">Update Text</label>
@@ -103,7 +107,7 @@ function Toolbar({
         </div>
       )}
 
-      {/* Image */}
+      {/* Image Source */}
       {el.type === "image" && (
         <div className="flex flex-col">
           <label className="text-xs text-gray-600 mb-1">Image URL</label>
@@ -127,13 +131,12 @@ function Toolbar({
         />
       </div>
 
-      {/* Header Link Text */}
+      {/* Header Link Editor */}
       {el.type === "header" &&
         Array.isArray(form.links) &&
         selectedLinkIndex !== null &&
         selectedLinkIndex < form.links.length && (
           <>
-            {/* Text */}
             <div className="flex flex-col">
               <label className="text-xs text-gray-600 mb-1">
                 Edit Link #{selectedLinkIndex + 1}
@@ -150,7 +153,6 @@ function Toolbar({
               />
             </div>
 
-            {/* Per-link Font Size */}
             <div>
               <label className="block text-xs text-gray-500">
                 Link Font Size
@@ -171,12 +173,13 @@ function Toolbar({
               />
             </div>
 
-            {/* Per-link Color */}
             <div>
               <label className="block text-xs text-gray-500">Link Color</label>
               <input
                 type="color"
-                value={form.linkStyles?.[selectedLinkIndex]?.color || "#ffffff"}
+                value={
+                  form.linkStyles?.[selectedLinkIndex]?.color || "#ffffff"
+                }
                 onChange={(e) => {
                   const updatedStyles = [...(form.linkStyles || [])];
                   const style = updatedStyles[selectedLinkIndex] || {};
@@ -190,57 +193,112 @@ function Toolbar({
           </>
         )}
 
-      {/* Button Text, Link & Color Editing */}
-      {el.type === "container" &&
-        containerEditField === "button" &&
-        planIndex !== null &&
-        form.plans?.[planIndex] && (
-          <>
+      {/* Container Sub Item Editing */}
+      {el.type === "container" && planIndex !== null && form.plans?.[planIndex] && (
+        <>
+          {/* Title */}
+          {containerEditField === "title" && (
             <div className="flex flex-col">
               <label className="text-xs text-gray-600 mb-1">
-                Button Text #{planIndex + 1}
+                Title #{planIndex + 1}
               </label>
               <input
                 type="text"
                 className="border rounded px-2 py-1 w-48"
-                value={form.plans[planIndex].buttonText || ""}
+                value={form.plans[planIndex].title || ""}
                 onChange={(e) =>
-                  updatePlanText(planIndex, "buttonText", e.target.value)
+                  updatePlanText(planIndex, "title", e.target.value)
                 }
               />
             </div>
+          )}
 
+          {/* Price */}
+          {containerEditField === "price" && (
             <div className="flex flex-col">
               <label className="text-xs text-gray-600 mb-1">
-                Button Link #{planIndex + 1}
+                Price #{planIndex + 1}
               </label>
               <input
                 type="text"
                 className="border rounded px-2 py-1 w-48"
-                value={form.plans[planIndex].buttonLink || ""}
+                value={form.plans[planIndex].price || ""}
                 onChange={(e) =>
-                  updatePlanText(planIndex, "buttonLink", e.target.value)
+                  updatePlanText(planIndex, "price", e.target.value)
                 }
               />
             </div>
+          )}
 
-            <div className="flex flex-col">
-              <label className="text-xs text-gray-600 mb-1">
-                Button Color #{planIndex + 1}
-              </label>
-              <input
-                type="color"
-                className="w-10 h-8 rounded"
-                value={form.plans[planIndex].buttonColor || "#2563eb"}
-                onChange={(e) =>
-                  updatePlanText(planIndex, "buttonColor", e.target.value)
-                }
-              />
-            </div>
-          </>
-        )}
+          {/* Feature */}
+          {containerEditField === "feature" &&
+            featureIndex !== null &&
+            form.plans[planIndex].features?.[featureIndex] !== undefined && (
+              <div className="flex flex-col">
+                <label className="text-xs text-gray-600 mb-1">
+                  Feature #{planIndex + 1}.{featureIndex + 1}
+                </label>
+                <input
+                  type="text"
+                  className="border rounded px-2 py-1 w-52"
+                  value={form.plans[planIndex].features[featureIndex]}
+                  onChange={(e) =>
+                    updateFeature(planIndex, featureIndex, e.target.value)
+                  }
+                />
+              </div>
+            )}
 
-      {/* Move Buttons */}
+          {/* Button */}
+          {containerEditField === "button" && (
+            <>
+              <div className="flex flex-col">
+                <label className="text-xs text-gray-600 mb-1">
+                  Button Text #{planIndex + 1}
+                </label>
+                <input
+                  type="text"
+                  className="border rounded px-2 py-1 w-48"
+                  value={form.plans[planIndex].buttonText || ""}
+                  onChange={(e) =>
+                    updatePlanText(planIndex, "buttonText", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-xs text-gray-600 mb-1">
+                  Button Link #{planIndex + 1}
+                </label>
+                <input
+                  type="text"
+                  className="border rounded px-2 py-1 w-48"
+                  value={form.plans[planIndex].buttonLink || ""}
+                  onChange={(e) =>
+                    updatePlanText(planIndex, "buttonLink", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-xs text-gray-600 mb-1">
+                  Button Color #{planIndex + 1}
+                </label>
+                <input
+                  type="color"
+                  className="w-10 h-8 rounded"
+                  value={form.plans[planIndex].buttonColor || "#2563eb"}
+                  onChange={(e) =>
+                    updatePlanText(planIndex, "buttonColor", e.target.value)
+                  }
+                />
+              </div>
+            </>
+          )}
+        </>
+      )}
+
+      {/* Move Up/Down Buttons */}
       <div className="flex gap-1 mt-4">
         <button
           onClick={onMoveUp}

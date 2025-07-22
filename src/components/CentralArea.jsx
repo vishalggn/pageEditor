@@ -90,11 +90,11 @@ function CentralArea({ width }) {
             selectedSubKey={selected === el.id ? selectedSubKey : null}
             onSelect={() => {
               setSelected(el.id);
-              setSelectedSubKey(null); // clear previous sub-selection
+              setSelectedSubKey(null);
             }}
             onSelectSubItem={(key) => {
-              setSelected(el.id); // ensure main element is selected
-              setSelectedSubKey(key); // store sub-element (e.g., "title-1")
+              setSelected(el.id);
+              setSelectedSubKey(key);
             }}
             onUpdateStyle={(style) => {
               setElements((prev) =>
@@ -103,6 +103,7 @@ function CentralArea({ width }) {
             }}
             onMoveUp={() => moveElement(el.id, "up")}
             onMoveDown={() => moveElement(el.id, "down")}
+            conWidth={width}
           />
         </div>
       ))}

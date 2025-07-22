@@ -14,6 +14,7 @@ function DraggableElement({
   onMoveDown,
   selectedSubKey,
   onSelectSubItem,
+  conWidth
 }) {
   const [selectedLinkIndex, setSelectedLinkIndex] = useState(null);
 
@@ -40,6 +41,7 @@ function DraggableElement({
             style={el.style}
             selectedKey={selectedSubKey}
             onSelectItem={onSelectSubItem}
+            conWidth={conWidth} 
           />
         );
       default:
